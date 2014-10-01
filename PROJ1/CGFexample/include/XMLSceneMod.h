@@ -12,6 +12,8 @@ public:
 	static TiXmlElement *findChildByAttribute(TiXmlElement *parent,const char * attr, const char *val);
 	
 	bool readRGBcomponents (char* rawString, float &R, float &G, float &B, float &A);
+	bool readXYcoord (char* rawString, float &x, float &y);
+	bool readXYZcoord (char* rawString, float &x, float &y, float &z);
 protected:
 
 	TiXmlDocument* doc;
@@ -19,17 +21,11 @@ protected:
 	/////////////Projecto LAIG////////////
 	TiXmlElement* globalsElement;
 	TiXmlElement* camerasElement;
-
-	//////////////////////////////////////
-
-	///////////Porjecto Exemplo///////////
-	TiXmlElement* initElement; 
-	TiXmlElement* matsElement;
-	TiXmlElement* textsElement;
-	TiXmlElement* leavesElement;
-	TiXmlElement* nodesElement;
 	TiXmlElement* graphElement;
+
 	//////////////////////////////////////
+
+
 };
 
 #endif
