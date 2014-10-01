@@ -22,16 +22,10 @@ XMLSceneMod::XMLSceneMod(char *filename)
 		exit(1);
 	}
 
-	//initElement = dgxElement->FirstChildElement( "Init" );
-	matsElement = dgxElement->FirstChildElement( "Materials" );
-	textsElement =  dgxElement->FirstChildElement( "Textures" );
-	leavesElement =  dgxElement->FirstChildElement( "Leaves" );
-	nodesElement =  dgxElement->FirstChildElement( "Nodes" );
-	graphElement =  dgxElement->FirstChildElement( "Graph" );
-
 
 	globalsElement = dgxElement->FirstChildElement( "globals" );
-	camerasElement = dgxElement->FirstChildElement( "cameras" );
+	//camerasElement = dgxElement->FirstChildElement( "cameras" );
+	graphElement = dgxElement->FirstChildElement( "graph" );
 
 	/////////////globals/////////////////
 	if (globalsElement == NULL)
@@ -196,7 +190,141 @@ XMLSceneMod::XMLSceneMod(char *filename)
 
 	
 	/////////////////GRAPH///////////////
+	//in progess
 
+
+	if (graphElement == NULL)
+		printf("Graph block not found!\n");
+	else
+	{
+		//criar grafo aqui
+		printf("\nProcessing Graph:\n");
+		//falta ler o atributo "root" do graph
+
+		char *prefix="  -";
+		TiXmlElement *node = graphElement->FirstChildElement("node");
+
+		while (node)
+		{
+			printf("-Node id: %s\n",node->Attribute("id"));
+			
+			
+			TiXmlElement *transforms  = node->FirstChildElement();
+			if (!transforms){
+				printf("	Error: Transforms block not found!\n");
+				break;
+			}
+			printf("	Transforms:\n");
+			TiXmlElement *transform = transforms->FirstChildElement("transform");  
+			while (transform)
+			{
+				char* tipo = (char*) transform->Attribute("type");
+							
+				
+				if (strcmp(tipo,"translate") == 0){
+					char* to = (char*) transform->Attribute("to");
+					printf("	-Type: %s -> %s\n", tipo, to);
+				} 
+				else if (strcmp(tipo,"rotate") == 0){					
+					char* axis = (char*) transform->Attribute("axis");
+					char* angle = (char*) transform->Attribute("angle");
+					printf("	-Type: %s -> axis: %s, angle: %s\n", tipo, axis, angle);
+				} 
+				else if (strcmp(tipo,"scale") == 0){
+					char* factor = (char*) transform->Attribute("factor");
+					printf("	-Type: %s -> %s\n", tipo, factor);
+				} 
+				else printf("	Missing/invalid transform\n");
+				
+
+				transform = transform->NextSiblingElement();
+			}
+
+			TiXmlElement *appearanceref  = node->FirstChildElement("appearanceref");
+			if (!appearanceref){
+				printf("	Error: Appearances block not found!\n");
+				break;
+			}
+			char* appearance = (char*) appearanceref->Attribute("id"); 
+			printf("	Appearance: %s\n", appearance);
+
+			
+			
+			TiXmlElement *primitives  = node->FirstChildElement("primitives");
+			if (primitives){
+				printf("	Primitives:\n");
+				TiXmlElement *primitive = primitives->FirstChildElement(); 
+				while (primitive)
+				{
+
+					//////////////rectangle//////////////
+					if (strcmp("rectangle", primitive->Value()) == 0){
+						char* xy1 = (char*) primitive->Attribute("xy1");
+						char* xy2 = (char*) primitive->Attribute("xy2");
+						float x1, y1, x2, y2;
+						if (readXYcoord(xy1, x1, y1) && readXYcoord(xy2, x2, y2))
+							printf("		rectangle: xy1-%.2f %.2f, xy2-%.2f %.2f\n", x1, y1, x2, y2);
+						else printf("		rectangle: invalid values or wrong format\n");
+					}
+
+
+					////////////triangle///////////
+					else if (strcmp("triangle", primitive->Value()) == 0){
+						char* xyz1 = (char*) primitive->Attribute("xyz1");
+						char* xyz2 = (char*) primitive->Attribute("xyz2");
+						char* xyz3 = (char*) primitive->Attribute("xyz3");
+						float x1,x2,x3,y1,y2,y3,z1,z2,z3;
+						if (readXYZcoord(xyz1, x1, y1, z1) && readXYZcoord(xyz2, x2, y2, z2)
+							&& readXYZcoord(xyz3, x3, y3, z3))
+						{
+							printf("		triangle:\n");
+							printf("			xyz1-%.2f %.2f %.2f,\n", x1, y1, z1);
+							printf("			xyz2-%.2f %.2f %.2f,\n", x2, y2, z2);
+							printf("			xyz3-%.2f %.2f %.2f\n", x3, y3, z3);
+						}
+						else printf("		triangle: invalid values or wrong format\n");
+					}
+
+
+					////////////cylinder//////////////
+					else if (strcmp("cylinder", primitive->Value()) == 0){
+						char* base = (char*) primitive->Attribute("base");
+						char* top = (char*) primitive->Attribute("top");
+						char* height = (char*) primitive->Attribute("height");
+						char* slices = (char*) primitive->Attribute("slices");
+						char* stacks = (char*) primitive->Attribute("stacks");
+						printf("		cylinder: base-%s, top-%s, height-%s, slices-%s, stacks-%s\n",
+							base, top, height, slices, stacks);
+					}
+
+
+					/////////////sphere////////////////
+					else if (strcmp("sphere", primitive->Value()) == 0){
+						char* radius = (char*) primitive->Attribute("radius");
+						char* slices = (char*) primitive->Attribute("slices");
+						char* stacks = (char*) primitive->Attribute("stacks");
+						printf("		sphere: radius-%s, slices-%s, stacks-%s\n", radius, slices, stacks);
+					}
+
+
+					///////////////torus///////////////
+					else if (strcmp("torus", primitive->Value()) == 0){
+						char* inner = (char*) primitive->Attribute("inner");
+						char* outer = (char*) primitive->Attribute("outer");
+						char* slices = (char*) primitive->Attribute("slices");
+						char* loops = (char*) primitive->Attribute("loops");
+						printf("		torus: inner-%s, outer-%s, slices-%s, loops-%s\n",
+							inner, outer, slices, loops);
+					}
+					else printf("		Invalid primitive detected\n");
+
+					primitive = primitive->NextSiblingElement();
+				}
+			}
+			node = node->NextSiblingElement();
+		}
+		//ao sair do while, é preciso verificar se existe pelo menos um nó
+	}
 
 	///////////////END OF GRAPH/////////
 
@@ -331,6 +459,13 @@ bool XMLSceneMod::readRGBcomponents (char* rawString, float &R, float &G, float 
 	return true;
 }
 
+bool XMLSceneMod::readXYcoord (char* rawString, float &x, float &y){
+	return (sscanf(rawString,"%f %f",&x, &y) == 2);
+}
+
+bool XMLSceneMod::readXYZcoord (char* rawString, float &x, float &y, float &z){
+	return (sscanf(rawString,"%f %f %f",&x, &y, &z) == 3);
+}
 
 XMLSceneMod::~XMLSceneMod()
 {

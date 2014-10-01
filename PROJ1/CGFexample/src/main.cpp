@@ -18,7 +18,9 @@ using std::exception;
 int main(int argc, char* argv[]) {
 	//XMLScene temp = XMLScene("demograph.xml");
 	XMLSceneMod temp = XMLSceneMod("anfFile.xml");
-		cin.get();
+	cin.get();
+
+
 	/*
 	CGFapplication app = CGFapplication();
 
@@ -28,6 +30,8 @@ int main(int argc, char* argv[]) {
 		app.setScene(new DemoScene());
 		app.setInterface(new CGFinterface());
 		
+		//parser deve ser chamado aqui
+
 		app.run();
 	}
 	catch(GLexception& ex) {
